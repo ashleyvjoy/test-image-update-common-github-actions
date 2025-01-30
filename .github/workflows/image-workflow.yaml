@@ -15,8 +15,8 @@ on:
     types: [image-update-workflow]
 
 jobs:
-  # go version update
+  # image version update
   image-version-update:
-    uses: dell/common-github-actions/.github/workflows/image-version-workflow.yaml@update-img-version
+    uses: ashleyvjoy/test-image-update-common-github-actions/.github/workflows/image-version-workflow.yaml@image-version-update-workflow
     name: Image Version Update
     secrets: inherit
