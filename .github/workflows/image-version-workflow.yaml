@@ -31,7 +31,7 @@ jobs:
         id: set-dockerfile-path
         run: |
           if [[ "${{ github.repository }}" == "dell/csi-powermax" ]]; then
-            echo "DOCKERFILE_PATH=csireverseproxy/Dockerfile Dockerfile" >> $GITHUB_ENV
+            echo "DOCKERFILE_PATH=csireverseproxy/Dockerfile, Dockerfile" >> $GITHUB_ENV
           elif [[ "${{ github.repository }}" == "dell/csm-replication" ]]; then
             echo "DOCKERFILE_PATH=Dockerfiles/Dockerfile" >> $GITHUB_ENV
           elif [[ "${{ github.repository }}" == "dell/csi-unity" ]]; then
