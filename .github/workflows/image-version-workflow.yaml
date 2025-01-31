@@ -27,15 +27,30 @@ jobs:
         with:
           fetch-depth: 0 # Fetch the full history including tags
 
+      - name: Set Dockerfile path based on repository
+        id: set-dockerfile-path
+        run: |
+          if [[ "${{ github.repository }}" == "dell/csi-powermax" ]]; then
+            echo "DOCKERFILE_PATH=csireverseproxy/Dockerfile Dockerfile" >> $GITHUB_ENV
+          elif [[ "${{ github.repository }}" == "dell/csm-replication" ]]; then
+            echo "DOCKERFILE_PATH=Dockerfiles/Dockerfile" >> $GITHUB_ENV
+          elif [[ "${{ github.repository }}" == "dell/csi-unity" ]]; then
+            echo "DOCKERFILE_PATH=Dockerfile.podman" >> $GITHUB_ENV
+          else
+            echo "DOCKERFILE_PATH=Dockerfile" >> $GITHUB_ENV
+          fi
+
       - name: Set environment variables
         env:
           release_pattern: 'release="([0-9]+)\.([0-9]+)\.([0-9]+)"'
           version_pattern: 'version="([0-9]+)\.([0-9]+)\.([0-9]+)"'
         run: |
-          release_value=$(grep -oP 'release="\K([0-9]+)\.([0-9]+)\.([0-9]+)' Dockerfile)
-          version_value=$(grep -oP 'version="\K([0-9]+)\.([0-9]+)\.([0-9]+)' Dockerfile)
-          echo "release_value=$release_value" >> $GITHUB_ENV
-          echo "version_value=$version_value" >> $GITHUB_ENV
+          for dockerfile in ${{ env.DOCKERFILE_PATHS }}; do
+            release_value=$(grep -oP 'release="\K([0-9]+)\.([0-9]+)\.([0-9]+)' $dockerfile)
+            version_value=$(grep -oP 'version="\K([0-9]+)\.([0-9]+)\.([0-9]+)' $dockerfile)
+            echo "release_value=$release_value" >> $GITHUB_ENV
+            echo "version_value=$version_value" >> $GITHUB_ENV
+          done
       
       - name: Increment version
         env:
