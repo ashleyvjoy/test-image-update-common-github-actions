@@ -48,51 +48,51 @@ jobs:
           for dockerfile in ${{ env.DOCKERFILE_PATH }}; do
             release_value=$(grep -oP 'release="\K([0-9]+)\.([0-9]+)\.([0-9]+)' $dockerfile)
             version_value=$(grep -oP 'version="\K([0-9]+)\.([0-9]+)\.([0-9]+)' $dockerfile)
-            echo "release_value=$release_value" >> $GITHUB_ENV
-            echo "version_value=$version_value" >> $GITHUB_ENV
+            echo "release_value_$dockerfile=$release_value" >> $GITHUB_ENV
+            echo "version_value_$dockerfile=$version_value" >> $GITHUB_ENV
           done
       
       - name: Increment version
-        env:
-          MY_VAR1: ${{ env.release_value }}
-          MY_VAR2: ${{ env.version_value }}
+        # env:
+        #   MY_VAR1: ${{ env.release_value }}
+        #   MY_VAR2: ${{ env.version_value }}
         run: |
-          current_version=$MY_VAR2
-          current_version=(${current_version#v}) # remove 'v' prefix from $current_version"
+          for dockerfile in $(echo ${{ env.DOCKERFILE_PATH }} | tr "," "\n"); do
+            current_version=$(eval echo \$${{ env.version_value_$dockerfile }})
+            current_release=$(eval echo \$${{ env.release_value_$dockerfile }})
 
-          current_release=$MY_VAR1
-          current_release=(${current_release#v}) # remove 'v' prefix from $current_release"
+            IFS='.' read -r -a version_parts <<< "$current_version"
+            IFS='.' read -r -a release_parts <<< "$current_release"              
           
-          IFS='.' read -r -a version_parts <<< "$current_version"
-          IFS='.' read -r -a release_parts <<< "$current_release"              
-          
-          if "${{ inputs.version == 'major' }}"; then
-              # major version bump up
-              version_parts[0]=$(expr ${version_parts[0]} + 1)
-              new_version="${version_parts[0]}.0.0"
-              release_parts[0]=$(expr ${release_parts[0]} + 1)
-              new_release="${release_parts[0]}.0.0"
-          fi
-          
-          if "${{ inputs.version == 'minor' }}"; then
-              # minor version bump up
-              version_parts[1]=$(expr ${version_parts[1]} + 1)
-              new_version="${version_parts[0]}.${version_parts[1]}.0"
-              release_parts[1]=$(expr ${release_parts[1]} + 1)
-              new_release="${release_parts[0]}.${release_parts[1]}.0"
-          fi
-          
-          if "${{ inputs.version == 'patch' }}"; then
-              # patch version bump up
-              version_parts[2]=$(expr ${version_parts[2]} + 1)
-              new_version="${version_parts[0]}.${version_parts[1]}.${version_parts[2]}"
-              release_parts[2]=$(expr ${release_parts[0]} + 1)
-              new_release="${release_parts[0]}.${release_parts[1]}.${release_parts[2]}"
-          fi
-          echo "New version to be released:v$new_version"
-          echo "NEW_VERSION=v${new_version}" >> $GITHUB_ENV
-          echo "New release will be:v$new_release"
-          echo "NEW_RELEASE=v${new_release}" >> $GITHUB_ENV
+            if "${{ inputs.version == 'major' }}"; then
+                # major version bump up
+                version_parts[0]=$(expr ${version_parts[0]} + 1)
+                new_version="${version_parts[0]}.0.0"
+                release_parts[0]=$(expr ${release_parts[0]} + 1)
+                new_release="${release_parts[0]}.0.0"
+            fi
+            
+            if "${{ inputs.version == 'minor' }}"; then
+                # minor version bump up
+                version_parts[1]=$(expr ${version_parts[1]} + 1)
+                new_version="${version_parts[0]}.${version_parts[1]}.0"
+                release_parts[1]=$(expr ${release_parts[1]} + 1)
+                new_release="${release_parts[0]}.${release_parts[1]}.0"
+            fi
+            
+            if "${{ inputs.version == 'patch' }}"; then
+                # patch version bump up
+                version_parts[2]=$(expr ${version_parts[2]} + 1)
+                new_version="${version_parts[0]}.${version_parts[1]}.${version_parts[2]}"
+                release_parts[2]=$(expr ${release_parts[0]} + 1)
+                new_release="${release_parts[0]}.${release_parts[1]}.${release_parts[2]}"
+            fi
+
+            echo "New version to be released:v$new_version"
+            echo "NEW_VERSION=v${new_version}" >> $GITHUB_ENV
+            echo "New release will be:v$new_release"
+            echo "NEW_RELEASE=v${new_release}" >> $GITHUB_ENV
+          done
 
       - name: Update Dockerfile with new versions
         run: |
