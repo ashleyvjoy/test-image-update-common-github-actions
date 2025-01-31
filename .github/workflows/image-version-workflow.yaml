@@ -25,7 +25,7 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch the full history including tags
+          fetch-depth: 0 # Fetch the full history including the tags
 
       - name: Set Dockerfile path based on repository
         id: set-dockerfile-path
