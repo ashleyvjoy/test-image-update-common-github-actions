@@ -63,16 +63,16 @@ jobs:
               # minor version bump up
               version_parts[1]=$(expr ${version_parts[1]} + 1)
               new_version="${version_parts[0]}.${version_parts[1]}.0"
-              release_parts[0]=$(expr ${release_parts[0]} + 1)
-              new_release="${release_parts[0]}.0.0"
+              release_parts[1]=$(expr ${release_parts[1]} + 1)
+              new_release="${release_parts[0]}.${release_parts[1]}.0"
           fi
           
           if "${{ inputs.version == 'patch' }}"; then
               # patch version bump up
               version_parts[2]=$(expr ${version_parts[2]} + 1)
               new_version="${version_parts[0]}.${version_parts[1]}.${version_parts[2]}"
-              release_parts[0]=$(expr ${release_parts[0]} + 1)
-              new_release="${release_parts[0]}.0.0"
+              release_parts[2]=$(expr ${release_parts[0]} + 1)
+              new_release="${release_parts[0]}.${release_parts[1]}.${release_parts[2]}"
           fi
           echo "New version to be released:v$new_version"
           echo "NEW_VERSION=v${new_version}" >> $GITHUB_ENV
