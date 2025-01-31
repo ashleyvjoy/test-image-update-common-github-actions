@@ -26,6 +26,7 @@ jobs:
         repo:
           [
             "ashleyvjoy/test-image-update-csi-powerscale",
+            "ashleyvjoy/test-image-version-worklow-csi-powermax",
           ]
 
     steps:
