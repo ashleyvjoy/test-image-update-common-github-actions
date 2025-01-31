@@ -46,12 +46,13 @@ jobs:
           version_pattern: 'version="([0-9]+)\.([0-9]+)\.([0-9]+)"'
         run: |
           for dockerfile in ${{ env.DOCKERFILE_PATH }}; do
+            echo $dockerfile
             release_value=$(grep -oP 'release="\K([0-9]+)\.([0-9]+)\.([0-9]+)' $dockerfile)
             version_value=$(grep -oP 'version="\K([0-9]+)\.([0-9]+)\.([0-9]+)' $dockerfile)
             echo "release_value=$release_value" >> $GITHUB_ENV
             echo "version_value=$version_value" >> $GITHUB_ENV
-            echo version_value
-            echo release_value
+            echo $version_value
+            echo $release_value
 
             current_version=${version_value}
             current_version=(${current_version#v})
@@ -62,8 +63,8 @@ jobs:
             IFS='.' read -r -a version_parts <<< "$current_version"
             IFS='.' read -r -a release_parts <<< "$current_release"
 
-            echo current_version
-            echo current_release              
+            echo $current_version
+            echo $current_release              
           
             if "${{ inputs.version == 'major' }}"; then
                 # major version bump up
