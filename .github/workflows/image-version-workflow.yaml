@@ -48,19 +48,9 @@ jobs:
           for dockerfile in ${{ env.DOCKERFILE_PATH }}; do
             release_value=$(grep -oP 'release="\K([0-9]+)\.([0-9]+)\.([0-9]+)' $dockerfile)
             version_value=$(grep -oP 'version="\K([0-9]+)\.([0-9]+)\.([0-9]+)' $dockerfile)
-            echo "release_value_$dockerfile=$release_value" >> $GITHUB_ENV
-            echo "version_value_$dockerfile=$version_value" >> $GITHUB_ENV
-          done
-      
-      - name: Increment version
-        # env:
-        #   MY_VAR1: ${{ env.release_value }}
-        #   MY_VAR2: ${{ env.version_value }}
-        run: |
-          for dockerfile in $(echo ${{ env.DOCKERFILE_PATH }} | tr "," "\n"); do
-            current_version=$(eval echo \$${{ env.version_value_$dockerfile }})
-            current_release=$(eval echo \$${{ env.release_value_$dockerfile }})
-
+            echo "release_value=$release_value" >> $GITHUB_ENV
+            echo "version_value=$version_value" >> $GITHUB_ENV
+            
             IFS='.' read -r -a version_parts <<< "$current_version"
             IFS='.' read -r -a release_parts <<< "$current_release"              
           
@@ -92,13 +82,11 @@ jobs:
             echo "NEW_VERSION=v${new_version}" >> $GITHUB_ENV
             echo "New release will be:v$new_release"
             echo "NEW_RELEASE=v${new_release}" >> $GITHUB_ENV
+
+            sed -i "s/release=\"$release_value\"/release=\"$NEW_RELEASE\"/" $dockerfile
+            sed -i "s/version=\"$version_value\"/version=\"$NEW_VERSION\"/" $dockerfile
           done
-
-      - name: Update Dockerfile with new versions
-        run: |
-          sed -i "s/release=\"$release_value\"/release=\"$NEW_RELEASE\"/" Dockerfile
-          sed -i "s/version=\"$version_value\"/version=\"$NEW_VERSION\"/" Dockerfile
-
+      
       # Needed for signing commits using Github App tokens
       # See: https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#commit-signing
       - uses: actions/create-github-app-token@v1.11.1
