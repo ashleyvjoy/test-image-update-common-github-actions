@@ -108,9 +108,9 @@ jobs:
             echo "New release will be:v$new_release"
             echo "NEW_RELEASE=v${new_release}" >> $GITHUB_ENV
 
-            echo $env.NEW_RELEASE
+            echo $NEW_RELEASE
             echo "Printed NEW_RELEASE"
-            echo $env.NEW_VERSION
+            echo $NEW_VERSION
             echo "Printed NEW_VERSION"
 
             sed -i "s/release=\"$release_value\"/release=\"$NEW_RELEASE\"/" $dockerfile
