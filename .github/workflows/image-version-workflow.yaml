@@ -132,7 +132,7 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
           branch: "updateImage-${{ env.NEW_VERSION }}"
-          commit-message: "Update image version to ${{ env.NEW_VERSION }} and release version to ${{ env.NEW_RELEASE }}"
+          commit-message: "Update image version and release version"
           title: "Update image version to ${{ env.NEW_VERSION }} and release version to ${{ env.NEW_RELEASE }}"
           body: |
             Image version updated to ${{ env.NEW_VERSION }}
