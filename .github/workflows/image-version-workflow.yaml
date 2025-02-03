@@ -115,7 +115,7 @@ jobs:
             sed -i "s/version=\"$version_value\"/version=\"$new_version\"/" $dockerfile
           done
           git add .
-          git commit -m "Update image version to $new_version and release version to $new_release"
+          git commit -m "Update image version to ${{ env.NEW_VERSION }} and release version to ${{ env.NEW_RELEASE }}"
 
       # Needed for signing commits using Github App tokens
       # See: https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#commit-signing
