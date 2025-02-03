@@ -108,11 +108,11 @@ jobs:
             echo "New release will be:v$new_release"
             echo "NEW_RELEASE=v${new_release}" >> $GITHUB_ENV
 
-            sed -i "s/release=\"$release_value\"/release=\"$env.NEW_RELEASE\"/" $dockerfile
-            sed -i "s/version=\"$version_value\"/version=\"$env.NEW_VERSION\"/" $dockerfile
+            sed -i "s/release=\"$release_value\"/release=\"${{ env.NEW_RELEASE }}\"/" $dockerfile
+            sed -i "s/version=\"$version_value\"/version=\"${{ env.NEW_VERSION }}\"/" $dockerfile
           done
           git add .
-          git commit -m "Update image version to $NEW_VERSION and release version to $NEW_RELEASE"
+          git commit -m "Update image version to ${{ env.NEW_VERSION }} and release version to ${{ env.NEW_RELEASE }}"
       # Needed for signing commits using Github App tokens
       # See: https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#commit-signing
       - uses: actions/create-github-app-token@v1.11.1
