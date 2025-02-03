@@ -53,6 +53,7 @@ jobs:
         run: echo "DOCKERFILE_PATH=${{ env.DOCKERFILE_PATH }}"
 
       - name: Set environment variables
+        id: set-env-vars
         env:
           release_pattern: 'release="([0-9]+)\.([0-9]+)\.([0-9]+)"'
           version_pattern: 'version="([0-9]+)\.([0-9]+)\.([0-9]+)"'
@@ -67,57 +68,55 @@ jobs:
             echo $version_value
             echo $release_value
 
-            current_version=${version_value}
-            current_version=(${current_version#v})
+            # Strip 'v' prefix if exists
+            current_version=${version_value#v}
+            current_release=${release_value#v}
 
-            current_release=${release_value}
-            current_release=(${current_release#v})
-            
+            echo "current_version=$current_version"
+            echo "current_release=$current_release"
+
             IFS='.' read -r -a version_parts <<< "$current_version"
             IFS='.' read -r -a release_parts <<< "$current_release"
 
-            echo $current_version
-            echo $current_release              
-          
-            if "${{ inputs.version == 'major' }}"; then
-                # major version bump up
+            if [ "${{ inputs.version }}" = "major" ]; then
+                # Major version bump up
                 version_parts[0]=$(expr ${version_parts[0]} + 1)
                 new_version="${version_parts[0]}.0.0"
                 release_parts[0]=$(expr ${release_parts[0]} + 1)
                 new_release="${release_parts[0]}.0.0"
-            fi
-            
-            if "${{ inputs.version == 'minor' }}"; then
-                # minor version bump up
+            elif [ "${{ inputs.version }}" = "minor" ]; then
+                # Minor version bump up
                 version_parts[1]=$(expr ${version_parts[1]} + 1)
                 new_version="${version_parts[0]}.${version_parts[1]}.0"
                 release_parts[1]=$(expr ${release_parts[1]} + 1)
                 new_release="${release_parts[0]}.${release_parts[1]}.0"
-            fi
-            
-            if "${{ inputs.version == 'patch' }}"; then
-                # patch version bump up
+            elif [ "${{ inputs.version }}" = "patch" ]; then
+                # Patch version bump up
                 version_parts[2]=$(expr ${version_parts[2]} + 1)
                 new_version="${version_parts[0]}.${version_parts[1]}.${version_parts[2]}"
-                release_parts[2]=$(expr ${release_parts[0]} + 1)
+                release_parts[2]=$(expr ${release_parts[2]} + 1)
                 new_release="${release_parts[0]}.${release_parts[1]}.${release_parts[2]}"
+            else
+                echo "Invalid version update type: ${{ inputs.version }}"
+                exit 1
             fi
 
-            echo "New version to be released:v$new_version"
-            echo "$NEW_VERSION=v${new_version}" >> $GITHUB_ENV
-            echo "New release will be:v$new_release"
-            echo "$NEW_RELEASE=v${new_release}" >> $GITHUB_ENV
+            echo "New version to be released: v$new_version"
+            echo "NEW_VERSION=v${new_version}" >> $GITHUB_ENV
+            echo "New release will be: v$new_release"
+            echo "NEW_RELEASE=v${new_release}" >> $GITHUB_ENV
 
-            echo $NEW_RELEASE
-            echo "Printed NEW_RELEASE"
-            echo ${{ env.NEW_VERSION }}
-            echo "Printed NEW_VERSION"
+            # Print to verify values
+            echo "NEW_VERSION=v${new_version}"
+            echo "NEW_RELEASE=v${new_release}"
 
-            sed -i "s/release=\"$release_value\"/release=\"$NEW_RELEASE\"/" $dockerfile
-            sed -i "s/version=\"$version_value\"/version=\"$NEW_VERSION\"/" $dockerfile
+            # Replace the version and release in Dockerfile
+            sed -i "s/release=\"$release_value\"/release=\"$new_release\"/" $dockerfile
+            sed -i "s/version=\"$version_value\"/version=\"$new_version\"/" $dockerfile
           done
           git add .
-          git commit -m "Update image version to $NEW_RELEASE and release version to $NEW_VERSION"
+          git commit -m "Update image version and release version"
+
       # Needed for signing commits using Github App tokens
       # See: https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#commit-signing
       - uses: actions/create-github-app-token@v1.11.1
@@ -133,7 +132,7 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
           branch: "updateImage-${{ env.NEW_VERSION }}"
-          commit-message: "Update image version to ${{ env.NEW_VERSION }} and release version to ${{ env.NEW_RELEASE }}"
+          commit-message: "Update image version and release version"
           title: "Update image version to ${{ env.NEW_VERSION }} and release version to ${{ env.NEW_RELEASE }}"
           body: |
             Image version updated to ${{ env.NEW_VERSION }}
