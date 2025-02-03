@@ -27,6 +27,15 @@ jobs:
         with:
           fetch-depth: 0 # Fetch the full history including the tags
 
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+            gpg_private_key: ${{ secrets.CSM_GPG_PRIVATE_KEY }}
+            git_user_signingkey: true
+            git_commit_gpgsign: true
+            git_tag_gpgsign: true
+            git_config_global: true
+
       - name: Set Dockerfile path based on repository
         id: set-dockerfile-path
         run: |
