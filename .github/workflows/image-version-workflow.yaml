@@ -39,7 +39,7 @@ jobs:
       - name: Set Dockerfile path based on repository
         id: set-dockerfile-path
         run: |
-          if [[ "${{ github.repository }}" == "dell/csi-powermax" ]]; then
+          if [[ "${{ github.repository }}" == "ashleyvjoy/test-image-version-worklow-csi-powermax" ]]; then
             echo "DOCKERFILE_PATH=csireverseproxy/Dockerfile, Dockerfile" >> $GITHUB_ENV
           elif [[ "${{ github.repository }}" == "ashleyvjoy/test-workflow-replication" ]]; then
             echo "DOCKERFILE_PATH=Dockerfiles/Dockerfile" >> $GITHUB_ENV
