@@ -27,7 +27,7 @@ jobs:
           [
             "ashleyvjoy/test-image-update-csi-powerscale",
             "ashleyvjoy/test-image-version-worklow-csi-powermax",
-            "/ashleyvjoy/test-workflow-replication"
+            "ashleyvjoy/test-workflow-replication",
           ]
 
     steps:
